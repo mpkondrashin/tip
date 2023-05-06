@@ -41,10 +41,7 @@ func csvRead(fileName string) (*TipList, error) {
 	}
 	stat := make(map[string]int)
 	tip := NewTipList()
-	for i, line := range records {
-		if i == 0 {
-			continue
-		}
+	for _, line := range records[1:] {
 		if len(line) < 4 {
 			log.Fatalf("Can not parse line: %s", strings.Join(line, ","))
 		}
