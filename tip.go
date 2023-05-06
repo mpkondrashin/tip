@@ -4,7 +4,31 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
+
+/*
+*** 5000 hashes most (remove this line)***
+[Files]
+---replace this by SHA1/SHA256/MD5, one hash per line---
+---replace this by SHA1/SHA256/MD5, one hash per line---
+---replace this by SHA1/SHA256/MD5, one hash per line---
+
+[Mails]
+---replace this by MD5, one hash per line---
+---replace this by MD5, one hash per line---
+---replace this by MD5, one hash per line---
+
+[URLs]
+---replace this by URL, one URL per line---
+---replace this by URL, one URL per line---
+---replace this by URL, one URL per line---
+
+[Detections]
+---replace this by Detection Name, one Detection Name per line---
+---replace this by Detection Name, one Detection Name per line---
+---replace this by Detection Name, one Detection Name per line---
+*/
 
 const MaxEntities = 5000
 
@@ -47,14 +71,14 @@ func NewTipList() *TipList {
 	}
 }
 
-func (t *TipList) Add(list ListKind, file string) {
-	if len(t.tips) == 0 {
+func (t *TipList) Add(list ListKind, value string) {
+	if len(t.tips) == 0 || t.tips[len(t.tips)-1].Count() == MaxEntities {
 		t.tips = append(t.tips, Tip{})
 	}
-	if t.tips[len(t.tips)-1].Count() == MaxEntities {
-		t.tips = append(t.tips, Tip{})
+	if list == URLs {
+		value = unmaskURL(value)
 	}
-	t.tips[len(t.tips)-1].Add(list, file)
+	t.tips[len(t.tips)-1].Add(list, value)
 }
 
 func (t *TipList) GenerateResult(baseFileName string) error {
@@ -81,4 +105,12 @@ func (t *TipList) GenerateResult(baseFileName string) error {
 		}
 	}
 	return nil
+}
+
+func unmaskURL(url string) string {
+	//	hxxps://storage[.]googleapis[.]com/f50awc2m6bnj[.]appspot[.]com/w/dYueD9RXGH2qCQQ[.]html?b=394909745746782860
+	if strings.HasPrefix(url, "hxxp") {
+		url = "http" + url[4:]
+	}
+	return strings.ReplaceAll(url, "[.]", ".")
 }
